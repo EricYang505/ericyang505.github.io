@@ -1,0 +1,92 @@
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="../css/common.css">
+</head>
+
+<body>
+    <h1>Activity</h1>
+    <h3>Activity's lifecycle:</h3>
+    <div class="center"><img src="images/activity-lifecycle.png"></img>
+    </div>
+
+    <br>
+    <h3>Pausing and Resuming an Activity</h3>
+    <p>The order of lifecycle that occur when Activity A starts Acivity B:
+        <ol type="1">
+            <li>Activity A's onPause() method executes.</li>
+            <li>Activity B's onCreate(), onStart(), and onResume() methods execute in sequence. (Activity B now has user focus.)</li>
+            <li>Then, if Activity A is no longer visible on screen, its onStop() method executes.
+            </li>
+        </ol>
+    </p>
+    <p>Generally, you should not use onPause() to store user changes (such as personal information entered into a form) to permanent storage. The only time you should persist user changes to permanent storage within onPause() is when you're certain users expect the changes to be auto-saved (such as when drafting an email). However, you should avoid performing CPU-intensive work during onPause(), such as writing to a database, because it can slow the visible transition to the next activity (you should instead perform heavy-load shutdown operations during onStop()).
+        <br>
+        <br>You should keep the amount of operations done in the onPause() method relatively simple in order to allow for a speedy transition to the user's next destination if your activity is actually being stopped.
+    </p>
+
+    <h3>Stopping and Restarting an Activity</h3>
+    <p> In extreme cases, the system might simply kill your app process without calling the activity's final onDestroy() callback, so it's important you use onStop() to release resources that might leak memory. There are situations where the system will simply kill the activity's hosting process without calling this method (or any others) in it, so it should not be used to do things that are intended to remain around after the process goes away.
+    </p>
+    <p>Although the onPause() method is called before onStop(), you should use onStop() to perform larger, more CPU intensive shut-down operations, such as writing information to a database.
+        <pre>@Override
+protected void onStop() {
+    super.onStop();  // Always call the superclass method first
+
+    // Save the note's current draft, because the activity is stopping
+    // and we want to be sure the current note progress isn't lost.
+    ContentValues values = new ContentValues();
+    values.put(NotePad.Notes.COLUMN_NAME_NOTE, getCurrentNoteText());
+    values.put(NotePad.Notes.COLUMN_NAME_TITLE, getCurrentNoteTitle());
+
+    getContentResolver().update(
+            mUri,    // The URI for the note to update.
+            values,  // The map of column names and new values to apply to them.
+            null,    // No SELECT criteria are used.
+            null     // No WHERE columns are used.
+            );
+}</pre>
+    </p>
+    <p>The onRestart() method, however, is called only when the activity resumes from the stopped state, so you can use it to perform special restoration work that might be necessary only if the activity was previously stopped, but not destroyed.</p>
+
+
+    <h3>Destroy an Activity when: </h3>
+    <ol type="1">
+        <li>User presses the Back button</li>
+        <li>Activity signals its own destruction by calling finish()</li>
+        <li>Stopped and hasn't been used in a long time</li>
+        <li>The foreground activity requires more resources</li>
+    </ol>
+    <p>
+        When the user presses Back or the activity finishes itself, the system's concept of that Activity instance is gone forever. However, if the system destroys the activity due to system constraints (rather than normal app behavior), then although the actual Activity instance is gone, the system remembers that it existed such that if the user navigates back to it, the system creates a new instance of the activity using a set of saved data that describes the state of the activity when it was destroyed. The saved data that the system uses to restore the previous state is called the "instance state" and is a collection of key-value pairs stored in a Bundle object.
+    </p>
+<h3>Save Your Activity State</h3>
+<p>By default, the system uses the Bundle instance state to save information about each View object in your activity layout (such as the text value entered into an EditText object). In order for the Android system to restore the state of the views in your activity, each view must have a unique ID, supplied by the android:id attribute.
+</p>
+<pre>
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState); // Always call the superclass first
+    // Check whether we're recreating a previously destroyed instance
+    if (savedInstanceState != null) {
+        // Restore value of members from saved state
+        mCurrentScore = savedInstanceState.getInt(STATE_SCORE);
+        mCurrentLevel = savedInstanceState.getInt(STATE_LEVEL);
+    }
+}
+@Override
+public void onSaveInstanceState(Bundle savedInstanceState) {
+    // Save the user's current game state
+    savedInstanceState.putInt(STATE_SCORE, mCurrentScore);
+    savedInstanceState.putInt(STATE_LEVEL, mCurrentLevel);
+    
+    // Always call the superclass so it can save the view hierarchy state
+    super.onSaveInstanceState(savedInstanceState);
+}
+</pre>
+<h3>Fragment</h3>
+    <p>Fragment has its own lifecycle, receives its own input events, and which you can add or remove while the activity is running (sort of like a "sub activity" that you can reuse in different activities).</p>
+</body>
+
+
+</html>

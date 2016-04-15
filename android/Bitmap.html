@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="../css/common.css">
+    <meta charset="utf-8">
+  </head>
+
+  <body>
+    <h1>Loading Large Bitmaps Efficiently</h1>
+    <h4>Read Bitmap Dimensions and Type</h4>
+    <p>To avoid java.lang.OutOfMemory exceptions, check the dimensions of a bitmap before decoding it:
+        <pre>
+BitmapFactory.Options options = new BitmapFactory.Options();
+//Setting true while decoding avoids memory allocation
+options.inJustDecodeBounds = true;
+BitmapFactory.decodeResource(getResources(), R.id.myimage, options);
+int imageHeight = options.outHeight;
+int imageWidth = options.outWidth;
+String imageType = options.outMimeType;</pre>  
+    </p>
+    <h4>Load a Scaled Down Version into Memory</h4>
+    <p>To tell the decoder to subsample the image, loading a smaller version into memory, set inSampleSize in your BitmapFactory. For example, an image with resolution 2048x1536 that is decoded with an inSampleSize of 4 produces a bitmap of approximately 512x384. Loading this into memory uses 0.75MB rather than 12MB for the full image.
+    <pre>public static int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+    // Raw height and width of image
+    final int height = options.outHeight;
+    final int width = options.outWidth;
+    int inSampleSize = 1;
+
+    if (height > reqHeight || width > reqWidth) {
+
+        final int halfHeight = height / 2;
+        final int halfWidth = width / 2;
+
+        // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+        // height and width larger than the requested height and width.
+        while ((halfHeight / inSampleSize) > reqHeight
+                && (halfWidth / inSampleSize) > reqWidth) {
+            inSampleSize *= 2;
+        }
+    }
+
+    return inSampleSize;
+}
+
+public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId,
+        int reqWidth, int reqHeight) {
+
+    // First decode with inJustDecodeBounds=true to check dimensions
+    final BitmapFactory.Options options = new BitmapFactory.Options();
+    options.inJustDecodeBounds = true; //not load to memory
+    BitmapFactory.decodeResource(res, resId, options); //returning null
+
+    // Calculate inSampleSize
+    options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+    // Decode bitmap with inSampleSize set
+    options.inJustDecodeBounds = false;//load to memory for actually decode
+    return BitmapFactory.decodeResource(res, resId, options);
+}</pre>
+    <pre>//How to use:
+    mImageView.setImageBitmap(
+    decodeSampledBitmapFromResource(getResources(), R.id.myimage, 100, 100));</pre>
+    </p>
+    <h1>Processing Bitmaps Off the UI Thread</h1>
+    <h1>Caching Bitmaps</h1>
+    <h1>Managing Bitmap Memory</h1>
+    <h1>Displaying Bitmaps in Your UI</h1>
+  </body>
+</html>

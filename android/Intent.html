@@ -1,0 +1,15 @@
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="../css/common.css">
+</head>
+
+<body>
+    <h1>Intent</h1>
+    <h3>Verify There is an App to Receive the Intent</h3>
+    <p>You should always include a verification step before invoking an intent. If you invoke an intent and there is no app available on the device that can handle the intent, your app will crash.</p>
+    <pre>PackageManager packageManager = getPackageManager();
+List activities = packageManager.queryIntentActivities(intent,
+        PackageManager.MATCH_DEFAULT_ONLY);
+boolean isIntentSafe = activities.size() > 0;</pre>
+</body>
