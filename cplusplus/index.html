@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="../css/common.css">
+    <meta charset="utf-8">
+  </head>
+
+  <body>
+      <h4>Virtual destructors are useful when you can delete an instance of a derived class through a pointer to base class:</h4>
+      <pre>class Base 
+{
+    // some virtual methods
+};
+
+class Derived : public Base
+{
+    ~Derived()
+    {
+        // Do some important cleanup
+    }
+}</pre>
+    
+      <p>Here, you'll notice that I didn't declare Base's destructor to be virtual. Now, let's have a look at the following snippet:</p>
+<pre>Base *b = new Derived();
+// use b
+delete b; // Here's the problem!</pre>
+<p>
+Since Base's destructor is not virtual and b is a Base* pointing to a Derived object, delete b has undefined behaviour. In most implementations, the call to the destructor will be resolved like any non-virtual code, meaning that the destructor of the base class will be called but not the one of the derived class, resulting in resources leak.<br>
+<br>
+To sum up, always make base classes' destructors virtual when they're meant to be manipulated polymorphically.
+<br><br>
+If you want to prevent the deletion of an instance through a base class pointer, you can make the base class destuctor protected and nonvirtual; by doing so, the compiler won't let you call delete on a base class pointer.
+<br><br>
+You can learn more about virtuality and virtual base class destructor in <a href="http://www.gotw.ca/publications/mill18.htm">this article from Herb Sutter</a>.
+</p>
+      <h4><a href="http://www.cprogramming.com/tutorial/virtual_inheritance.html">Solving the Diamond Problem with Virtual Inheritance</a></h4>
+  </body>
+</html>
+
+
+
+
+

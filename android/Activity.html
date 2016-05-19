@@ -86,7 +86,27 @@ public void onSaveInstanceState(Bundle savedInstanceState) {
 </pre>
 <h3>Fragment</h3>
     <p>Fragment has its own lifecycle, receives its own input events, and which you can add or remove while the activity is running (sort of like a "sub activity" that you can reuse in different activities).</p>
+<h3>Intent</h3>
+<pre>Intent.setPackage(String packageName) //(Usually optional) Set an explicit application package name that limits the components this Intent will resolve to.
+</pre>
+<p>But, then you just can't call any activity of any random app. That particular activity should have an intent-filter with a MAIN action.</p>
+<pre>
+Intent intent = new Intent();
+intent.setComponent(new ComponentName("packagename","fullyqualifiedactivityname"));
+startActivity(intent);
+
+        Intent i = new Intent();
+        String pkg = "com.xyz.app1";
+        String cls = "com.xyz.app1.App1MainActivity";
+        i.setComponent(new ComponentName(pkg, cls));
+        App2MainActivity.this.startActivity(i); //App1MainActivity can start
+        
+        Intent i = new Intent();
+        String pkg = "com.xyz.app1";
+        String cls = "com.xyz.app1.App1XyzActivity";
+        i.setComponent(new ComponentName(pkg, cls));
+        App2MainActivity.this.startActivity(i); 
+</pre>
+<p> An exception occur the reason is we can not start randomly any activity of another app even if you know the package name and its class name but you can start another app main activity if it have intent filter with action MAIN and if you know its package name and class name.</p>
 </body>
-
-
 </html>

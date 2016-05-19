@@ -62,6 +62,111 @@ public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId,
     mImageView.setImageBitmap(
     decodeSampledBitmapFromResource(getResources(), R.id.myimage, 100, 100));</pre>
     </p>
+    <p>When decode the image, speed depend on reading from disk or network, size of image, power of CPU. AsyncTask is an typical way to handle this:</p>
+<pre>class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
+    private final WeakReference<ImageView> imageViewReference;
+
+    public BitmapWorkerTask(ImageView imageView) {
+        // Use a WeakReference to ensure the ImageView can be garbage collected
+        imageViewReference = new WeakReference<ImageView>(imageView);
+    }
+
+    @Override
+    protected Bitmap doInBackground(Integer... params) {
+        return decodeSampledBitmapFromResource(getResources(), data, 100, 100));
+    }
+
+    // Once complete, see if ImageView is still around and set bitmap.
+    @Override
+    protected void onPostExecute(Bitmap bitmap) {
+        if (imageViewReference != null && bitmap != null) {
+            final ImageView imageView = imageViewReference.get();
+            if (imageView != null) {
+                imageView.setImageBitmap(bitmap);
+            }
+        }
+    }
+}</pre>
+    <h4>Handle Concurrency(ListView, GridView):</h4>
+    <p>An example from android blog to handle loading bitmap into listview using AsyncTask: <a href="http://android-developers.blogspot.com/2010/07/multithreading-for-performance.html">Multithreading
+for Performance</a></p>
+    <p>Personal example to loading thumbnails from internet: <a href="https://github.com/EricYang505/android-imagedownloader">Image downloader in List/Recycle View</a></p>
+    <p>Create a dedicated Drawable subclass to store a reference back to the worker task. In this case, a BitmapDrawable is used so that a placeholder image can be displayed in the ImageView while the task completes:</p>
+    <pre>static class AsyncDrawable extends BitmapDrawable {
+    private final WeakReference<BitmapWorkerTask> bitmapWorkerTaskReference;
+
+    public AsyncDrawable(Resources res, Bitmap bitmap,
+            BitmapWorkerTask bitmapWorkerTask) {
+        super(res, bitmap);
+        bitmapWorkerTaskReference =
+            new WeakReference<BitmapWorkerTask>(bitmapWorkerTask);
+    }
+    }
+
+    public BitmapWorkerTask getBitmapWorkerTask() {
+        return bitmapWorkerTaskReference.get();
+    }
+    
+    public void loadBitmap(int resId, ImageView imageView) {
+    if (cancelPotentialWork(resId, imageView)) {
+        final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
+        final AsyncDrawable asyncDrawable =
+                new AsyncDrawable(getResources(), mPlaceHolderBitmap, task);
+        imageView.setImageDrawable(asyncDrawable);
+        task.execute(resId);
+    }
+}
+
+public static boolean cancelPotentialWork(int data, ImageView imageView) {
+    final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
+
+    if (bitmapWorkerTask != null) {
+        final int bitmapData = bitmapWorkerTask.data;
+        // If bitmapData is not yet set or it differs from the new data
+        if (bitmapData == 0 || bitmapData != data) {
+            // Cancel previous task
+            bitmapWorkerTask.cancel(true);
+        } else {
+            // The same work is already in progress
+            return false;
+        }
+    }
+    // No task associated with the ImageView, or an existing task was cancelled
+    return true;
+}
+
+private static BitmapWorkerTask getBitmapWorkerTask(ImageView imageView) {
+   if (imageView != null) {
+       final Drawable drawable = imageView.getDrawable();
+       if (drawable instanceof AsyncDrawable) {
+           final AsyncDrawable asyncDrawable = (AsyncDrawable) drawable;
+           return asyncDrawable.getBitmapWorkerTask();
+       }
+    }
+    return null;
+}
+
+class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
+    ...
+
+    @Override
+    protected void onPostExecute(Bitmap bitmap) {
+        if (isCancelled()) {
+            bitmap = null;
+        }
+
+        if (imageViewReference != null && bitmap != null) {
+            final ImageView imageView = imageViewReference.get();
+            final BitmapWorkerTask bitmapWorkerTask =
+                    getBitmapWorkerTask(imageView);
+            if (this == bitmapWorkerTask && imageView != null) {
+                imageView.setImageBitmap(bitmap);
+            }
+        }
+    }
+}
+</pre>
+    
     <h1>Processing Bitmaps Off the UI Thread</h1>
     <h1>Caching Bitmaps</h1>
     <h1>Managing Bitmap Memory</h1>
