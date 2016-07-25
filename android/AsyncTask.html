@@ -1,0 +1,64 @@
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="../css/common.css">
+</head>
+
+<body>
+    <p>AsyncTask is a light weight asynchonous task which able to run background task in a threadpool and post result to UI thread.
+    </p>
+    <p>Before Android 1.6, AsyncTask execute task serially; After 1.6 version, it changes to concurrent using threadpoll. After 3.0, it changes back to serially by default. But if you still want to run multiple task at the same time, you can do like below: <pre>asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);</pre></p>
+<p>Based on source code, AsyncTask has two thread pool: SerialExecutor and THREAD_POOL_EXECUTOR. By default it uses SerialExecutor to run task. But still it provide interface to allow you run task with THREAD_POOL_EXECUTOR. 
+<pre>
+    private static volatile Executor sDefaultExecutor = SERIAL_EXECUTOR;
+</pre>
+<pre>
+    private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
+    private static final int CORE_POOL_SIZE = CPU_COUNT + 1;
+    private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
+    private static final int KEEP_ALIVE = 1;
+    public static final Executor THREAD_POOL_EXECUTOR
+            = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE,
+                    TimeUnit.SECONDS, sPoolWorkQueue, sThreadFactory);
+                        public final AsyncTask<Params, Progress, Result> executeOnExecutor(Executor exec,
+            Params... params) {
+</pre>
+<pre>
+    public final AsyncTask<Params, Progress, Result> executeOnExecutor(Executor exec,
+            Params... params) {
+        if (mStatus != Status.PENDING) {
+            switch (mStatus) {
+                case RUNNING: //Not able to run when it already is running
+                    throw new IllegalStateException("Cannot execute task:"
+                            + " the task is already running.");
+                case FINISHED: //AsyncTask is only able to run one time.
+                    throw new IllegalStateException("Cannot execute task:"
+                            + " the task has already been executed "
+                            + "(a task can be executed only once)");
+            }
+        }
+
+        mStatus = Status.RUNNING;
+
+        onPreExecute();
+
+        mWorker.mParams = params;
+        exec.execute(mFuture);
+
+        return this;
+    }
+</pre>
+</p>
+<h4>AsyncTask with memory leak</h4>    
+<pre>public class MainActivity extends Activity{
+        ...
+        private class MyTask extends AsyncTask<String, Void, String> {
+            
+        }
+        ...
+    }
+</pre>
+<p>MyTask class is the inner class of MainActivity, so it has an implicit reference to out class. If the task is keeping running, it will hold the MainActivity which cause memory leak. The better way to define MyTask as inner static class.</p>
+</body>
+
+</html>
