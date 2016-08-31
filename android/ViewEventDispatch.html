@@ -1,0 +1,61 @@
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="../css/common.css">
+</head>
+
+<body>
+    <h1>View event dispatch and example used in hybrid app</h1>
+    <h3>Case requirement:</h3>
+    <p>Hybrid app is mixing native and web stuff toghther. Normal approch is using the cordova plugin to make javascript call native code to implement some native functions like open camera or retrive gps coordinates. But in this case is we need a webview and native view show on the same screen for a hybrid app. Like show an native mapview on screen but the navigation bar or other view on top of it are still using webview.</p>
+    <h3>Solution:</h3>
+    <p>We can make some of the webview area to be transparent, and put the native view under that area with exact same size. The main challenges including for this solution: </p>
+    <li>Put native view under webview with right position and size</li>
+    <li>Recognize the touch event and send the event to webview or native map view based inside/outside the transparent area</li>
+    
+    <p>For the first changllene, we can put the native map under a html tag with same position and size.</p>
+    <li>Get html tag positon and size and pass to native side</li>
+    <pre>
+    var pageRect = getPageRect();
+    var rect = div.getBoundingClientRect();
+    var divRect = [rect.left + pageRect.left, rect.top + pageRect.top, rect.width, rect.height];
+    </pre>
+    <li>Make all parent tags to be transparent, so that the native view can show up in that area</li>
+    <pre>
+    while (div.parentNode) {
+        div.style.backgroundColor = 'transparent';
+        div = div.parentNode;
+    }
+    </pre>
+    <li>Also get all children tags which need show above the native map</li>
+    <pre> 
+    var children = getAllChildren(div);
+    for (var i = 0; i < children.length; i++) {
+        element = children[i];
+        elemId = "elementId" + i;
+        elements.push({
+            id: elemId,
+            rect: getDivRect(element)
+        });
+        i++;
+    }
+    //native part, store every tag area
+    touchLayout.addOverlayHtml(idStr, new RectF(marginLeft, marginTop, marginLeft + w, marginTop + h));
+    </pre>
+    
+    <p>Web side is setted up, Now, we start preparing the native side:</p>
+    <li>Put the webView inside a layout, we call it touchLayout</li>
+    <pre>
+        touchLayout = new TouchLayout(cordova.getActivity(), mWebView);
+        removeAllViews();
+        touchLayout.addView(mWebView);
+        nativeViewContainer.addView(touchLayout, -1, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        //* @param index: the position at which to add the child or -1 to add last, from bottom to top, so if index is 0 it will put to bottom
+    </pre>
+    <li>Add native map under the touchLayout</li>
+    <pre>
+        addViewToNative(mapView, 0, lp);
+    </pre>
+    <p>After all these steps, the map can be show under the html tag which is transparent. So the next step is to solve the second problem:</p>
+    <a>http://mp.weixin.qq.com/s?__biz=MzA5MzI3NjE2MA==&mid=2650236652&idx=1&sn=57c44b8a0923f3ecaae69a33defc5bad&scene=0#wechat_redirect</a>
+</body>

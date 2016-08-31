@@ -1,0 +1,34 @@
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="../css/common.css">
+</head>
+
+<body>
+    <h1>Doze and Standby mode</h1>
+    <h3>Doze:</h3>
+    <p>If a user unplugs a device and leaves it stationary, with its screen off, for a period of time, the device goes into Doze mode, where it attempts to keep the system in a sleep state. In Doze mode, the system attempts to conserve battery by restricting apps' access to network and CPU-intensive services. It also prevents apps from accessing the network and defers their jobs, syncs, and standard alarms.</p>
+    <p>Periodically, the system exits Doze for a brief time to let apps complete their deferred activities. During this maintenance window, the system runs all pending syncs, jobs, and alarms, and lets apps access the network. Over time, the system schedules maintenance windows less and less frequently, helping to reduce battery consumption in cases of longer-term inactivity when the device is not connected to a charger.</p>
+    <img src="images/doze.png"></img>
+    <p>As soon as the user wakes the device by moving it, turning on the screen, or connecting a charger, the system exits Doze and all apps return to normal activity.</p>
+    <h3>Doze restrictions:</h3>
+    <li>Network access is suspended.</li>
+    <li>The system ignores  <a href="https://developer.android.com/training/scheduling/wakelock.html">wake locks.</a></li>
+    <li>Standard <a href="https://developer.android.com/reference/android/app/AlarmManager.html">AlarmManager</a> alarms (including setExact() and setWindow()) are deferred to the next maintenance window.</li>
+    <li>If you need to set alarms that fire while in Doze, use setAndAllowWhileIdle() or setExactAndAllowWhileIdle().</li>
+    <li>Alarms set with setAlarmClock() continue to fire normally -- the system exits Doze shortly before those alarms fire.</li>
+    <h3>Adapting your app to Doze</h3>
+    <p>Doze is particularly likely to affect activities that AlarmManager alarms and timers manage, because alarms in Android 5.1 (API level 22) or lower do not fire when the system is in Doze.</p>
+    <p>To help with scheduling alarms, Android 6.0 (API level 23) introduces two new AlarmManager methods: setAndAllowWhileIdle() and setExactAndAllowWhileIdle(). With these methods, you can set alarms that will fire even if the device is in Doze.</p>
+    <pre>Note: Neither setAndAllowWhileIdle() nor setExactAndAllowWhileIdle() can fire alarms more than once per 9 minutes, per app.</pre>
+    <h3>App Standby:</h3>
+    <p>App Standby allows the system to determine that an app is idle when the user is not actively using it. The system makes this determination when the user does not touch the app for a certain period of time. If the device is unplugged, the system disables network access and suspends syncs and jobs for the apps it deems idle.</p>
+    <p>The system makes this determination when the user does not touch the app for a certain period of time and none of the following conditions applies:</p>
+    <li>The user explicitly launches the app.</li>
+    <li>The app has a process currently in the foreground (either as an activity or foreground service, or in use by another activity or foreground service).</li>
+    <li>The app generates a notification that users see on the lock screen or in the notification tray.</li>
+    <p> If the device is idle for long periods of time, the system allows idle apps network access around once a day.</p>
+    
+    <h3>Test Apps with doze and standby</h3>
+    <p>you can use adb commands to force the system to enter and exit Doze and observe your app’s behavior. For details, see <a href="https://developer.android.com/training/monitoring-device-state/doze-standby.html#testing_doze_and_app_standby">Testing with Doze and App Standby.</a>
+</p>
