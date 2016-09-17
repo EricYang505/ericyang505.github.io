@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/common.css">
+
+  </head>
+
+  <body>
+    Object-C:
+
+https://github.com/qinjx/30min_guides/blob/master/ios.md
+
+      1.继承：Objective-C与同Java和Smalltalk一样不支持多重继承，而C++语言支持多重继承（从侧面可以说明多重继承的效率不高）；
+
+      2.函数调用：Objective-C通过互相传递消息实现函数调用，而C++直接进行函数调用
+
+       3.定型：Objective-C是动态定型（dynamicaly typed)。所以它的类库比C++要容易操作。Objective-C 在运行时可以允许根据字符串名字来访问方法和类，还可以动态连接和添加类。而C++，对象的静态类型决定你是否可以发送消息给它。
+
+       4.接口：Objective-C采用protocol协议（非正式和正式）的形式来定义接口，而C++采用虚函数的形式来定义接口。
+
+       5.方法重载：c++中允许两个方法的名字相同，参数个数相同，但是参数类型不同，以及不同的返回值类型。而OC中不允许同一个类中两个方法有相同的名字，参数个数相同，参数类型不同。如下图XCode报错：
+
+
+
+PS:
+
+Simula67学派主张编程安全，即大部分程序可以在编译时查出，他的支持者声称既然程序设计出色何必再要灵活性，而Smalltalk称为了灵活可以容忍运行时多出错。因此Objective-C和C++的区别就是Objective-C更加灵活而降低了其编译的要求（这个降低并不是说编译就无要求，不会进行类型检查等），而C++提高编译的要求，在编译的过程发现更多的潜在错误，在运行前改正，同时会降低程序的灵活性。因此，在Smalltalk看来正确的程序在Simulr 67那里就无法通过。例如：
+对于这行代码：NSString *test =(id) [[NSArray alloc] init];//在编译期间，C++认为是错误的，而OC则认为没有问题。
+
+总之两者的差别主要是因为Objective-C是既支持Dynamic Typing，也支持Static Typing的语言。对于id类型的变量，变量只是一个容器，本身是没有类型的，或者是属于最基本的类型，所以也不需要强制转换。因为编译器不会检查变量的类型是否正确，只是运行时如果类型不正确才会产生异常。
+
+而C++是Static Typing语言，编译时会检查类型，所以必须要加上强制类型转换，否则编译器会报错。
+
+
+在这里你需要忘记你认为在C++中的一些好习惯。Objective-C过去使用垃圾回收器来管理内存，就像我，作为一个C++程序员，对这点是非常的痛恨的，这让我不由得想起Java来，让程序变得非常的慢。但是ARC（automatic reference counting自动引用计数）不一样，这个一个编译时的功能，他在编译时就已经告诉了对象何时该被销毁。有了ARC功能，我们不再需要向对象手动发送retain/release消息来管理内存，编译器已经自动帮我们完成了。
+
+所有的变量的strong的强引用变量（相当于只要这个变量还存在，这个对象就必须存在）。同时你可以设置为弱引用，只要其他强引用丢失，这个对象就会销毁。
+
+Categories Add Methods to Existing Classes,A category can be declared for any class, even if you don’t have the original implementation source code
+
+#import "XYZPerson+XYZPersonNameDisplayAdditions.h"
+ 
+@implementation XYZPerson (XYZPersonNameDisplayAdditions)
+- (NSString *)lastNameFirstNameString {
+    return [NSString stringWithFormat:@"%@, %@", self.lastName, self.firstName];
+}
+@end
+#import "XYZPerson+XYZPersonNameDisplayAdditions.h"
+@implementation SomeObject
+- (void)someMethod {
+    XYZPerson *person = [[XYZPerson alloc] initWithFirstName:@"John"
+                                                    lastName:@"Doe"];
+    XYZShoutingPerson *shoutingPerson =
+                        [[XYZShoutingPerson alloc] initWithFirstName:@"Monica"
+                                                            lastName:@"Robinson"];
+ 
+    NSLog(@"The two people are %@ and %@",
+         [person lastNameFirstNameString], [shoutingPerson lastNameFirstNameString]);
+}
+@end
+Class Extensions Extend the Internal Implementation
+
+
+A class extension bears some similarity to a category, but it can only be added to a class for which you have the source code at compile time. class extensions are often referred to as anonymous categories.
+Unlike regular categories, a class extension can add its own properties and instance variables to a class.
+@interface XYZPerson ()
+@property NSObject *extraProperty;
+@end
+2. If you add any methods in a class extension, these must be implemented in the primary implementation for the class.
+Class extensions are often used to extend the public interface with additional private methods or properties for use within 
+the implementation of the class itself.
+// Ship.h
+#import <Foundation/Foundation.h>
+#import "Person.h"
+ 
+@interface Ship : NSObject
+ 
+@property (strong, readonly) Person *captain;
+ 
+- (id)initWithCaptain:(Person *)captain;
+ 
+@end
+
+// Ship.m
+#import "Ship.h"
+ 
+ 
+// The class extension.
+@interface Ship()
+ 
+@property (strong, readwrite) Person *captain;
+ 
+@end
+ 
+ 
+// The standard implementation.
+@implementation Ship
+ 
+@synthesize captain = _captain;
+ 
+- (id)initWithCaptain:(Person *)captain {
+    self = [super init];
+    if (self) {
+        // This WILL work because of the extension.
+        [self setCaptain:captain];
+    }
+    return self;
+}
+ 
+@end
+
+Clients using the Ship class aren't supposed to import the implementation file, so the captain property will remain read-only.
+
+
+  </body>
+</html>

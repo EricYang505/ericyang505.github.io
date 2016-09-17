@@ -13,6 +13,7 @@
     <li>Put native view under webview with right position and size</li>
     <li>Recognize the touch event and send the event to webview or native map view based inside/outside the transparent area</li>
     
+    <h3>Put native view under webview with right position and size</h3>
     <p>For the first changllene, we can put the native map under a html tag with same position and size.</p>
     <li>Get html tag positon and size and pass to native side</li>
     <pre>
@@ -57,5 +58,65 @@
         addViewToNative(mapView, 0, lp);
     </pre>
     <p>After all these steps, the map can be show under the html tag which is transparent. So the next step is to solve the second problem:</p>
-    <a>http://mp.weixin.qq.com/s?__biz=MzA5MzI3NjE2MA==&mid=2650236652&idx=1&sn=57c44b8a0923f3ecaae69a33defc5bad&scene=0#wechat_redirect</a>
+    <h3>Recognize the touch event and send the event to webview or native map view based inside/outside the transparent area</h3>
+    <p>For this task we need understand the basics inside View of Android:</p>
+    <pre>   public boolean dispatchTouchEvent(MotionEvent ev)
+//Pass the touch screen motion event down to the target view, or this view if it is the target.
+    </pre>
+    <pre>
+public boolean onInterceptTouchEvent(MotionEvent ev) // only ViewGroup has it, ViewGroup is subclass of View
+//Implement this method to intercept all touch screen motion events. This method is called inside dispatchTouchEvent().
+    </pre>
+<p>
+Events will be received in the following order:
+
+<li>You will receive the down event here.</li>
+<li>The down event will be handled either by a child of this view group, or given to your own onTouchEvent() method to handle; this means you should implement onTouchEvent() to return true, so you will continue to see the rest of the gesture (instead of looking for a parent view to handle it). Also, by returning true from onTouchEvent(), you will not receive any following events in onInterceptTouchEvent() and all touch processing must happen in onTouchEvent() like normal.
+</li>
+<li>For as long as you return false from this function, each following event (up to and including the final up) will be delivered first here and then to the target's onTouchEvent().
+</li>
+<li>If you return true from here, you will not receive any following events: the target view will receive the same event but with the action ACTION_CANCEL, and all further events will be delivered to your onTouchEvent() method and no longer appear here.
+</li>
+</p>
+<pre>
+public boolean onTouchEvent(MotionEvent ev)
+// Implement this method to handle touch screen motion events. Return value: True if the event was handled, false otherwise.
+</pre>
+<p> So we can override the function of onInterceptTouchEvent() and verify if the touch event happends inside the mapView. Even inside the mapView, we also need to verify if the click event happens on some html tags which are the children of the map tag.(on top of the map). </p>
+<pre> 
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        int x = (int) event.getX();
+        int y = (int) event.getY();
+        Rect rectf = new Rect();
+        MarginLayoutParams lp = (MarginLayoutParams) mMapView.getLayoutParams();
+        mMapView.getLocalVisibleRect(rectf);
+        rectf.offset(lp.leftMargin, lp.topMargin);
+        boolean notContains = true;
+        if (rectf.contains(x, y)) {
+            // Is the touch point on any HTML elements?
+            Set elements = this.htmlNodes.entrySet();
+            Iterator<Map.Entry<String, RectF>> iterator = elements.iterator();
+            Map.Entry entry;
+            while (iterator.hasNext()) {
+                entry = iterator.next();
+                if (entry.getValue().contains(x, y)) {
+                    notContains = false;
+                    break;
+                }
+            }
+            if (!notContains) {
+                mWebView.requestFocus(View.FOCUS_DOWN);
+            }
+            return notContains;
+        }
+        return false; //outside of mapView
+    }
+    
+    public boolean onTouchEvent(MotionEvent ev) {
+        return false; // do not consume the event so it can pass to the next layer of ViewGroup
+    }
+</pre>
+<p>So the logical is clear, if onInterceptTouchEvent return true, the event will be handled by the viewGroup so that the following event will be handled by onTouchEvent(). Here we hard coded onTouchEvent to return false, so it won't consume the event so it can pass to the next layer of ViewGroup</p>
+    <a href="http://mp.weixin.qq.com/s?__biz=MzA5MzI3NjE2MA==&mid=2650236652&idx=1&sn=57c44b8a0923f3ecaae69a33defc5bad&scene=0#wechat_redirect">  For the details about view event dispatch can reference here</a>
+    
 </body>

@@ -12,7 +12,7 @@
 
     <br>
     <h3>Pausing and Resuming an Activity</h3>
-    <p>The order of lifecycle that occur when Activity A starts Acivity B:
+    <p>when apps run in multi-window mode, only one of the apps has the focus at any time; the system pauses all other apps. The order of lifecycle that occur when Activity A starts Acivity B:
         <ol type="1">
             <li>Activity A's onPause() method executes.</li>
             <li>Activity B's onCreate(), onStart(), and onResume() methods execute in sequence. (Activity B now has user focus.)</li>
@@ -61,7 +61,7 @@ protected void onStop() {
         When the user presses Back or the activity finishes itself, the system's concept of that Activity instance is gone forever. However, if the system destroys the activity due to system constraints (rather than normal app behavior), then although the actual Activity instance is gone, the system remembers that it existed such that if the user navigates back to it, the system creates a new instance of the activity using a set of saved data that describes the state of the activity when it was destroyed. The saved data that the system uses to restore the previous state is called the "instance state" and is a collection of key-value pairs stored in a Bundle object.
     </p>
 <h3>Save Your Activity State</h3>
-<p>By default, the system uses the Bundle instance state to save information about each View object in your activity layout (such as the text value entered into an EditText object). In order for the Android system to restore the state of the views in your activity, each view must have a unique ID, supplied by the android:id attribute.
+<p>By default, the system uses the Bundle instance state to save information about each View object in your activity layout (such as the text value entered into an EditText object). In order for the Android system to restore the state of the views in your activity, each view must have a unique ID, supplied by the android:id attribute. To save additional state information for your activity, you must implement onSaveInstanceState() and add key-value pairs to the Bundle object. For example:
 </p>
 <pre>
 @Override
@@ -87,6 +87,7 @@ public void onSaveInstanceState(Bundle savedInstanceState) {
 <h3>Fragment</h3>
     <p>Fragment has its own lifecycle, receives its own input events, and which you can add or remove while the activity is running (sort of like a "sub activity" that you can reuse in different activities).</p>
 <h3>Intent</h3>
+<p>An intent is an abstract description of an operation to be performed. It can be used with startActivity to launch an Activity, broadcastIntent to send it to any interested BroadcastReceiver components, and startService(Intent) or bindService(Intent, ServiceConnection, int) to communicate with a background Service.</p>
 <pre>Intent.setPackage(String packageName) //(Usually optional) Set an explicit application package name that limits the components this Intent will resolve to.
 </pre>
 <p>But, then you just can't call any activity of any random app. That particular activity should have an intent-filter with a MAIN action.</p>
