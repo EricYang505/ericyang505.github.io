@@ -9,6 +9,7 @@
 
   <body>
     <h1>This is my technical blog</h1>
+      <li><a href="https://developer.apple.com/library/content/referencelibrary/GettingStarted/DevelopiOSAppsSwift/index.html#//apple_ref/doc/uid/TP40015214-CH2-SW1">Get started</a></li>
       <li><a href="basic.html">Basics</a></li>
       <li><a href="https://developer.apple.com/library/content/documentation/iPhone/Conceptual/iPhoneOSProgrammingGuide/Introduction/Introduction.html#//apple_ref/doc/uid/TP40007072">About iOS App Architecture</a></li>
       <li><a href="http://www.cnblogs.com/ider/archive/2013/02/28/ios-development-official-documents.html">iOS开发官方文档汇总</a></li>
@@ -17,7 +18,16 @@
       <li><a href="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/index.html#//apple_ref/doc/uid/TP40010853">Understanding Auto Layout</a></li>
       <li><a href="https://developer.apple.com/library/content/documentation/General/Conceptual/DevPedia-CocoaCore/NibFile.html#//apple_ref/doc/uid/TP40008195-CH34">Nib file</a></li>
       <li><a href="https://developer.apple.com/library/content/documentation/General/Conceptual/Devpedia-CocoaApp/Animation.html#//apple_ref/doc/uid/TP40009071-CH11-SW1">Cocoa Application Competencies for iOS</a></li>
+      <li><a href="https://onevcat.com/2014/07/ios-ui-unique/">WWDC 2014 Session笔记 - iOS界面开发的大一统</a></li>
+      <h4>NSOperation vs Grand Central Dispatch</h4>
+      <p>GCD is a low-level C-based API that enables very simple use of a task-based concurrency model. NSOperation and NSOperationQueue are Objective-C classes that do a similar thing. NSOperation was introduced first, but as of 10.6 and iOS 4, NSOperationQueue and friends are internally implemented using GCD.
 
-    
+In general, you should use the highest level of abstraction that suits your needs. This means that you should usually use NSOperationQueue instead of GCD, unless you need to do something that NSOperationQueue doesn't support.
+
+Note that NSOperationQueue isn't a "dumbed-down" version of GCD; in fact, there are many things that you can do very simply with NSOperationQueue that take a lot of work with pure GCD. (Examples: bandwidth-constrained queues that only run N operations at a time; establishing dependencies between operations. Both very simple with NSOperation, very difficult with GCD.) Apple's done the hard work of leveraging GCD to create a very nice object-friendly API with NSOperation. Take advantage of their work unless you have a reason not to.
+
+Caveat: On the other hand, if you really just need to send off a block, and don't need any of the additional functionality that NSOperationQueue provides, there's nothing wrong with using GCD. Just be sure it's the right tool for the job.
+
+</p>
   </body>
 </html>

@@ -18,6 +18,7 @@
     <li>If you need to set alarms that fire while in Doze, use setAndAllowWhileIdle() or setExactAndAllowWhileIdle().</li>
     <li>Alarms set with setAlarmClock() continue to fire normally -- the system exits Doze shortly before those alarms fire.</li>
     <h3>Adapting your app to Doze</h3>
+    <a href="https://developer.android.com/training/scheduling/index.html">Managing Device Awake State</a>
     <p>Doze is particularly likely to affect activities that AlarmManager alarms and timers manage, because alarms in Android 5.1 (API level 22) or lower do not fire when the system is in Doze.</p>
     <p>To help with scheduling alarms, Android 6.0 (API level 23) introduces two new AlarmManager methods: setAndAllowWhileIdle() and setExactAndAllowWhileIdle(). With these methods, you can set alarms that will fire even if the device is in Doze.</p>
     <pre>Note: Neither setAndAllowWhileIdle() nor setExactAndAllowWhileIdle() can fire alarms more than once per 9 minutes, per app.</pre>
