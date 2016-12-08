@@ -118,5 +118,5 @@ public boolean onTouchEvent(MotionEvent ev)
 </pre>
 <p>So the logical is clear, if onInterceptTouchEvent return true, the event will be handled by the viewGroup so that the following event will be handled by onTouchEvent(). Here we hard coded onTouchEvent to return false, so it won't consume the event so it can pass to the next layer of ViewGroup</p>
     <a href="http://mp.weixin.qq.com/s?__biz=MzA5MzI3NjE2MA==&mid=2650236652&idx=1&sn=57c44b8a0923f3ecaae69a33defc5bad&scene=0#wechat_redirect">  For the details about view event dispatch can reference here</a>
-    
+    <a href="http://blog.csdn.net/lmj623565791/article/details/39102591">ViewGroup event dispatch<a>
 </body>
